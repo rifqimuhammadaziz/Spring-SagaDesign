@@ -6,6 +6,8 @@ import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.springframework.beans.BeanUtils;
+import rifqimuhammadaziz.CommonService.command.CompleteOrderCommand;
+import rifqimuhammadaziz.CommonService.events.OrderCompletedEvent;
 import rifqimuhammadaziz.orderservice.command.api.command.CreateOrderCommand;
 import rifqimuhammadaziz.orderservice.command.api.events.OrderCreatedEvent;
 
@@ -39,5 +41,22 @@ public class OrderAggregate {
         this.quantity = event.getQuantity();
         this.productId = event.getProductId();
         this.addressId = event.getAddressId();
+    }
+
+    @CommandHandler
+    public void handle(CompleteOrderCommand completeOrderCommand) {
+        // Validate the command
+        // Publish Order Completed Event
+        OrderCompletedEvent orderCompletedEvent = OrderCompletedEvent.builder()
+                .orderStatus(completeOrderCommand.getOrderStatus())
+                .orderId(completeOrderCommand.getOrderId())
+                .build();
+        AggregateLifecycle.apply(orderCompletedEvent);
+    }
+
+    @EventSourcingHandler
+    public void on(OrderCompletedEvent event) {
+        this.orderStatus = event.getOrderStatus();
+
     }
 }
